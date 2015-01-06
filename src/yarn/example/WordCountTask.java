@@ -28,9 +28,9 @@ public class WordCountTask implements Task {
 			}
 			word = word.toLowerCase();
 			long num = jedis.zincrby("wordcount", 1, word).longValue();
-			log.info(word + " : " + num);
-			
-		}				
+			log.info(word + " : " + num);			
+		}
+		jedis.close();
 	}
 
 	@Override
