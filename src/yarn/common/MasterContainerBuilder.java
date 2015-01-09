@@ -14,56 +14,55 @@ import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
 public class MasterContainerBuilder extends ContainerBuilder {
-	private static final Log log = LogFactory.getLog(MasterContainerBuilder.class);
-	
-	private String tmpHdfsDir;
+    private static final Log log = LogFactory.getLog(MasterContainerBuilder.class);
 
-	public MasterContainerBuilder(Configuration conf, String tmpHdfsDir) {
-		super(conf, Constant.AM_CONFIG_PREFIX);
-		this.tmpHdfsDir = tmpHdfsDir;
-	}
+    private String tmpHdfsDir;
 
-	@Override
-	protected String getLocalResourceDir() {
-		String tmpDir = tmpHdfsDir + "am/";
-		return tmpDir;
-	}
+    public MasterContainerBuilder(Configuration conf, String tmpHdfsDir) {
+        super(conf, Constant.AM_CONFIG_PREFIX);
+        this.tmpHdfsDir = tmpHdfsDir;
+    }
 
-	@Override
-	protected String getInputArguments() {
-		return tmpHdfsDir;
-	}
+    @Override
+    protected String getLocalResourceDir() {
+        String tmpDir = tmpHdfsDir + "am/";
+        return tmpDir;
+    }
 
-	@Override
-	protected ByteBuffer getAllTokens() {
-		ByteBuffer fsTokens = null;
-		if (UserGroupInformation.isSecurityEnabled()) {
-			String tokenRenewer = conf.get(YarnConfiguration.RM_PRINCIPAL);
-			if (tokenRenewer == null || tokenRenewer.length() == 0) {
-				log.error("Can't get Master Kerberos principal for the RM to use as renewer");
-			}
-			Credentials credentials = new Credentials();
-			FileSystem fs;
-			try {
-				fs = FileSystem.get(conf);
-				// For now, only getting tokens for the default file-system.
-				final Token<?>[] tokens = fs.addDelegationTokens(tokenRenewer, credentials);
-				if (tokens != null) {
-					for (Token<?> token : tokens) {
-						log.info("Get delegation tokens for " + fs.getUri() + " : "	+ token);
-					}
-				}
-				DataOutputBuffer dob = new DataOutputBuffer();
-				credentials.writeTokenStorageToStream(dob);
-				fsTokens = ByteBuffer.wrap(dob.getData(), 0, dob.getLength());
-				log.info("The file system tokens : " +  fsTokens);
-			} catch (IOException e) {
-				log.error("Can not get the file system tokens", e);
-			}
-		} else {
-			log.info("Be not SecurityEnabled!");
-		}
-		return  fsTokens;
-	}
+    @Override
+    protected String getInputArguments() {
+        return tmpHdfsDir;
+    }
 
+    @Override
+    protected ByteBuffer getAllTokens() {
+        ByteBuffer fsTokens = null;
+        if (UserGroupInformation.isSecurityEnabled()) {
+            String tokenRenewer = conf.get(YarnConfiguration.RM_PRINCIPAL);
+            if (tokenRenewer == null || tokenRenewer.length() == 0) {
+                log.error("Can't get Master Kerberos principal for the RM to use as renewer");
+            }
+            Credentials credentials = new Credentials();
+            FileSystem fs;
+            try {
+                fs = FileSystem.get(conf);
+                // For now, only getting tokens for the default file-system.
+                final Token<?>[] tokens = fs.addDelegationTokens(tokenRenewer, credentials);
+                if (tokens != null) {
+                    for (Token<?> token : tokens) {
+                        log.info("Get delegation tokens for " + fs.getUri() + " : " + token);
+                    }
+                }
+                DataOutputBuffer dob = new DataOutputBuffer();
+                credentials.writeTokenStorageToStream(dob);
+                fsTokens = ByteBuffer.wrap(dob.getData(), 0, dob.getLength());
+                log.info("The file system tokens : " + fsTokens);
+            } catch (IOException e) {
+                log.error("Can not get the file system tokens", e);
+            }
+        } else {
+            log.info("Be not SecurityEnabled!");
+        }
+        return fsTokens;
+    }
 }

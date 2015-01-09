@@ -14,56 +14,59 @@ import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.security.AMRMTokenIdentifier;
 
-public class TaskContainerBuilder extends ContainerBuilder{
-	private static final Log log = LogFactory.getLog(TaskContainerBuilder.class);	
-	
-	private String subproblemInput;
+public class TaskContainerBuilder extends ContainerBuilder {
+    private static final Log log = LogFactory.getLog(TaskContainerBuilder.class);
 
-	public TaskContainerBuilder(Configuration conf, String subproblemInput) {
-		super(conf, "yarn.container");
-		this.subproblemInput = subproblemInput;
-	}
+    private String subproblemInput;
+    private ByteBuffer allTokens = null;
 
-	@Override
-	protected String getLocalResourceDir() {
-		String tmpDir = conf.get(Constant.HDFS_LOCAL_RESOURCE_DIR) + "container/";
-		return tmpDir;
-	}
+    public TaskContainerBuilder(Configuration conf, String subproblemInput) {
+        super(conf, "yarn.container");
+        this.subproblemInput = subproblemInput;
+    }
 
-	@Override
-	protected String getInputArguments() {
-		return subproblemInput;
-	}
+    @Override
+    protected String getLocalResourceDir() {
+        String tmpDir = conf.get(Constant.HDFS_LOCAL_RESOURCE_DIR) + "container/";
+        return tmpDir;
+    }
 
-	@Override
-	protected ByteBuffer getAllTokens() {
-		DataOutputBuffer dob = new DataOutputBuffer();
-		Credentials credentials = null;
-		try {
-			credentials = UserGroupInformation.getCurrentUser().getCredentials();
-			credentials.writeTokenStorageToStream(dob);
-		} catch (IOException e) {
-			log.error("Cannot get Credentials", e);
-		}		
-		
-		// Now remove the AM->RM token so that containers cannot access it.
-		Iterator<Token<?>> iter = credentials.getAllTokens().iterator();
-		log.info("Executing with tokens:");
-		while (iter.hasNext()) {
-			Token<?> token = iter.next();
-			log.info(token);
-			if (token.getKind().equals(AMRMTokenIdentifier.KIND_NAME)) {
-				iter.remove();
-			}
-		}
-		ByteBuffer allTokens = ByteBuffer.wrap(dob.getData(), 0, dob.getLength());
-		// Create appSubmitterUgi and add original tokens to it
-		String appSubmitterUserName = System
-				.getenv(ApplicationConstants.Environment.USER.name());
-		UserGroupInformation appSubmitterUgi = UserGroupInformation
-				.createRemoteUser(appSubmitterUserName);
-		appSubmitterUgi.addCredentials(credentials);
-		return allTokens;
-	}
+    @Override
+    protected String getInputArguments() {
+        return subproblemInput;
+    }
+
+    @Override
+    protected ByteBuffer getAllTokens() {
+        if (null !=allTokens) {
+            return allTokens;
+        }
+        
+        DataOutputBuffer dob = new DataOutputBuffer();
+        Credentials credentials = null;
+        try {
+            credentials = UserGroupInformation.getCurrentUser().getCredentials();
+            credentials.writeTokenStorageToStream(dob);
+        } catch (IOException e) {
+            log.error("Cannot get Credentials", e);
+        }
+
+        // Now remove the AM->RM token so that containers cannot access it.
+        Iterator<Token<?>> iter = credentials.getAllTokens().iterator();
+        log.info("Executing with tokens:");
+        while (iter.hasNext()) {
+            Token<?> token = iter.next();
+            log.info(token);
+            if (token.getKind().equals(AMRMTokenIdentifier.KIND_NAME)) {
+                iter.remove();
+            }
+        }
+        allTokens = ByteBuffer.wrap(dob.getData(), 0, dob.getLength());
+        // Create appSubmitterUgi and add original tokens to it
+        String appSubmitterUserName = System.getenv(ApplicationConstants.Environment.USER.name());
+        UserGroupInformation appSubmitterUgi = UserGroupInformation.createRemoteUser(appSubmitterUserName);
+        appSubmitterUgi.addCredentials(credentials);
+        return allTokens;
+    }
 
 }
