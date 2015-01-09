@@ -90,8 +90,9 @@ public class ApplicationMaster {
         return response;
     }
 
-    private ContainerRequest buildContainerRequest(int requiredMemory, int requiredVirtualCores,
-            int requiredPriority) {
+    private ContainerRequest buildContainerRequest(int requiredMemory,
+                                                   int requiredVirtualCores,
+                                                   int requiredPriority) {
         Priority pri = Records.newRecord(Priority.class);
         pri.setPriority(requiredPriority);
 
