@@ -183,10 +183,11 @@ public class SimpleClient {
         }
     }
 
-    public SimpleClient(String jobName) {
+    public SimpleClient(String jobName, String appConfFile) {
         this.jobName = jobName;
         this.yarnConf = new YarnConfiguration(new Configuration());
         yarnConf.addResource(Constant.CONFIG_FILE_NAME);
+        yarnConf.addResource(appConfFile);
         this.appId = null;
     }
 

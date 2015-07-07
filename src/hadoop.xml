@@ -23,80 +23,10 @@
     <value>yarn.common.MasterMain</value>
   </property>
   
-  <property>  
-    <name>yarn.am.handler</name>  
-    <value>yarn.example.WordCountMasterHandler</value>
-  </property>  
-   
-  <property>  
-    <name>yarn.am.local-resource</name>  
-    <value>/home/hadoop/workspace/java/WordCount.jar</value>
-  </property>   
-  
-  <property>  
-    <name>yarn.am.required-containers-count</name>  
-    <value>3</value>
-  </property> 
    
   <property>  
     <name>yarn.container.launch-class-name</name>  
     <value>yarn.common.TaskMain</value>
   </property>
-
-  <property>  
-    <name>yarn.container.handler</name>  
-    <value>yarn.example.WordCountTask</value>
-  </property>
-
-  <property>  
-    <name>yarn.am.required-memory-mb</name>  
-    <value>256</value>
-  </property>
-
-  <property>  
-    <name>yarn.am.required-virtual-cores</name>  
-    <value>1</value>
-  </property>
-  
-  <property>  
-    <name>yarn.am.intervalMs</name>  
-    <value>3000</value>
-  </property>
-  
-  <property>  
-    <name>yarn.container.local-resource</name>  
-    <value>/home/hadoop/workspace/java/WordCount.jar,/home/hadoop/workspace/java/jedis.jar</value>
-  </property>
-
-  <property>  
-    <name>yarn.heapPerContainer</name>  
-    <value>256</value>
-  </property>
-  
-  <property>  
-    <name>yarn.defaultPriorityLevel</name>  
-    <value>10</value>
-  </property>
-  
-  
-  <property>  
-    <name>yarn.application.word-count.input-file</name>  
-    <value>10</value>
-  </property>
-  
-  <property>  
-    <name>yarn.application.word-count.input-file</name>  
-    <value>hdfs://master:7000/user/hadoop/news.txt</value>
-  </property>  
-  
-  <property>  
-    <name>yarn.application.redis.server-address</name>  
-    <value>192.168.101.138</value>
-  </property> 
-  
-  <property>  
-    <name>yarn.application.redis.server-port</name>  
-    <value>6379</value>
-  </property> 
   
 </configuration>
