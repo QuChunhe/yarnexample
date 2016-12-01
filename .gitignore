@@ -52,3 +52,5 @@ local.properties
 .texlipse
 
 .idea/
+
+target/
